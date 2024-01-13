@@ -1,4 +1,4 @@
-# 1. 웹 개발의 역사
+<img width="548" alt="image" src="https://github.com/FrontendStudySeoul/wooahanTypescriptWithReact/assets/103626175/4a306fce-d2a5-490a-9e2f-fb06e257d7ee"># 1. 웹 개발의 역사
 ## 웹의 성장
 - 웹 사이트에서 웹 어플리케이션으로 성장 -> 사용자가 웹에서 할 수 있는 기능들이 많아지고 웹이 복잡해짐
 ## 자바스크립트의 한계
@@ -104,3 +104,28 @@ interface Pet{
 ### 값 vs 타입
 타입스크립트에서는 enum과 class를 사용가능하며 이를 타입시스템으로 사용 가능하다. <br>
 <img width="518" alt="image" src="https://github.com/FrontendStudySeoul/wooahanTypescriptWithReact/assets/103626175/206b9c1c-2adc-43ab-b0cc-86f6f23a6838">
+
+#### enum
+enum은 타입스크립트에서 타입으로 사용될 수도 있지만, 값으로도 사용 가능하다.
+```tsx
+
+  enum Direction {
+    up,
+    down,
+    left,
+    right,
+  }
+
+  const fifaKey: Direction = 1;
+
+  console.log(Direction.up, fifaKey);
+```
+위 코드는 as const로도 구현이 가능하다.
+<img width="548" alt="image" src="https://github.com/FrontendStudySeoul/wooahanTypescriptWithReact/assets/103626175/8e32d2ad-9813-4dc2-b769-8a186fcea509">
+
+## 객체 타입
+### 배열
+[]형태로 나타내거나 Array타입으로 설정 가능하다.
+```tsx
+const studyMember:MoseungStudy[] = [...]
+```

@@ -393,20 +393,7 @@ function whatMintColor(palette: { MINT: string }) {
 타입스크립트에서 typeof, instanceof 그리고 타입 단언을 사용해서 타입을 확인할 수 있다. 
 
 - typeof
-    - 자바스크립트의 7가지 기본 데이터 타입(Boolean, null, undefined, Number, BigInt, String, Symbol)과 Function(함수), 호스트객체 그리고 object 객체가 될 수 있다.
-    - 값에서 사용된 typeof는 자바스크립트 런타임의 typeof 연산자가 된다.
-        
-        ```tsx
-        interface Person {
-        	first: string;
-        	last: string;
-        }
-        
-        const person: Person = { first: "zig", last: "song" }
-        
-        typeof person; //
-        ```
-        
+    - 자바스크립트의 7가지 기본 데이터 타입(Boolean, null, undefined, Number, BigInt, String, Symbol)과 Function(함수), 호스트객체 그리고 object 객체가 될 수 있다.        
     - 타입에서 사용된 typeof는 값을 읽고 타입스크립트 타입을 반환한다.
     - 값에서 사용된 typeof는 자바스트립트 런타임의 typeof 연산자가 된다.
     <img width="491" alt="image" src="https://github.com/FrontendStudySeoul/wooahanTypescriptWithReact/assets/70371342/3bca8b4a-6a96-4367-a347-956b5999d006">

@@ -528,7 +528,6 @@ exhaustiveCheck함수는 매개변수를 never타입으로 선언하고 있다.
 
 ---
 
-## 추가 자료
 
 # 추가 자료 : ts-pattern
 

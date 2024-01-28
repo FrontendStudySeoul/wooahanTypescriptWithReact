@@ -225,4 +225,73 @@ const fetchJobList = async (
   return new JobList(data);
 };
 ```
+그리고 뷰모델을 잘 관리하기 위하여 field에 값을 추가하기보단 getter함수로 값을 가져와야한다. 그럼으로써 두개의 장점을 얻을 수 있다.
+<br>
+1. 캡슐화와 정보 은닉
+2. computed데이터 가져오기
+
+## 7.2 API 상태 관리하기
+### 상태관리 라이브러리에서 호출하기
+앞서 설명했던것처럼 API요청은 컴포넌트에서 직접하지 않는걸 권장한다. API요청은 성공,실패,로딩등의 상태를 관리해야하기에 상태관리 라이브러리나 훅을 사용한다.
+1. **Redux**비동기상태를 관리하기 위한 라이브러리는 아니기에 이를 관리하기 위한 미들웨어 로직이 붙고 보일러플레이트도 거대하다.
+2. **Mobx**에서는 콜백함수나 비동기를 관리하기 위한 메소드를 제공하여 더 관리를 편하게 해준다.
+하지만 모든 상태관리라이브러리에서는 API요청에 비례하여 store도 늘어나는 문제가 발생하고 만약 한 상태를 두컴포넌트에서 들고 있다면 불필요한 호출이 늘어난다.
+
+### 훅으로 관리하기
+위의 단점들을 해결하기 위해 데이터에 캐싱전략을 정하고 loading,successs,refetch등의 상태를 훅형태로 관리하는 reactQuery나 SWR같은 라이브러리들이 있다.
+```tsx
+// Job 목록을 불러오는 훅
+
+// ["fetchJobList"] 키를 가진 캐시 쿼리를 생성하며, 해당 쿼리는 JobService.fetchJobList를 호출하여 직업 목록을 가져옴
+const useFetchJobList = () => {
+  return useQuery(['fetchJobList'], async () => {
+    const response = await JobService.fetchJobList();
+
+    //서버 응답을 받아서 JobList 뷰모델을 생성하고 반환
+    return new JobList(response);
+  });
+};
+
+const useUpdateJob = (
+  id: number,
+  { onSucess, ...options }: UseMutationOptions<void, Error, JobUpdateFormValue>
+): UseMutationResult<void, Error, JobUpdateFormValue> => {
+  const queryClient = useQueryClient();
+
+  // ["update", id] 키를 가진 캐시 쿼리를 만들어 업데이트 된 데이터를 관리
+  return useMutation(
+    ['update', id],
+    async (jobUpdateForm: JobUpdateFormValue) => {
+      //JobService.updateJob를 호출하여 서버에 업데이트를 요청
+      await JobService.updateJob(id, jobUpdateForm);
+    },
+    {
+      onSuccess: (data: void, values: JobUpdateFormValue, context: unknown) => {
+        // "fetchJobList" 쿼리를 무효화시켜 재조회를 유도
+        queryClient.invalidateQueries(['fetchJobList']);
+
+        onSuccess && onSuccess(data, values, context);
+      },
+      ...options,
+    }
+  );
+};
+```
+
+### react에서의 stale 그리고 캐싱전략 그리고 NextJS의 cache
+일반적으로 react-query에서는 stale과 fresh한데이터 상태를 구분하여 필요에 따라 데이터를 새로 요청하거나 캐싱된 데이터를 제공한다. 그리고 이 캐싱은 자바스크립트 메모리 즉 클라이언트 메모리에 저장된다.
+간단하게 질문해보겠다 staleTime을 10000으로 설정하고 10초뒤에 해당 데이터를 조회하면 리액트쿼리에서는 데이터를 어떻게 처리할까?
+제일 큰 차이는 아래 사진을 참고바란다.
+<img width="1081" alt="image" src="https://github.com/FrontendStudySeoul/wooahanTypescriptWithReact/assets/103626175/80cb3503-f57d-4dd2-822e-5dd6211963e5">
+이는 NextJS에서 데이터를 캐싱하는 원리와 유사하다.<br>
+<img width="645" alt="image" src="https://github.com/FrontendStudySeoul/wooahanTypescriptWithReact/assets/103626175/7e2c3483-dd12-45e0-b89a-a04b59db5a46">
+큰 차이는 NextJS에서는 fetch데이터를 서버 메모리 자원에서 관리하고 리액트쿼리는 클라이언트 메모리에서 관리한다. 여기서 메모리는 주로 RAM같은 하드웨어를 의미한다.
+<br>
+그리고 NextJS에서 데이터를 fetch하고 이 데이터를 cahching시간에 맞춰서 가지고 있다가 새로운 유저나 기존 유저의 라우팅이 발생하고 해당 데이터를 요창하면 이 값을 캐시된 자원에서 가져와서 관리한다.
+
+
+
+### 참조
+[react-query(timegambit블로그)](https://www.timegambit.com/blog/digging/react-query/03)
+   
 

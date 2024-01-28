@@ -144,7 +144,16 @@ const fetchOrderHistory = async () => {
 
 ### 3. 인터셉터 활용
 
+- HTTP 요청과 응답 중간 단계에서 로직 작성 가능.
+
 ```ts
+orderApiRequester.interceptors.response.use(
+  // 응답 성공시
+  (response: AxiosResponse) => response,
+  // 응답 실패시 httpErrorHandler() 호출
+  httpErrorHandler,
+);
+
 const httpErrorHandler = (
   error: AxiosError<ErrorResponse> | Error,
 ): Promise<Error> => {
@@ -156,13 +165,6 @@ const httpErrorHandler = (
     return Promise.reject(error);
   };
 };
-
-orderApiRequester.interceptors.response.use(
-  // 응답 성공시
-  (response: AxiosResponse) => response,
-  // 응답 실패시 httpErrorHandler() 호출
-  httpErrorHandler,
-);
 ```
 
 ```ts
@@ -361,18 +363,23 @@ const JobComponent: React.FC = () => {
 ```
 
 ```tsx
-interface Props {
-  error: AxiosError<any>;
-  errorMessageTitle: string;
-  errorMessage?: string;
-}
+const useGetCustomers = (
+  params?: GetCustomersRequestQuery,
+  isSearch?: boolean,
+) => {
+  const { handleApiError } = useHandleApiError();
+  const queryKey = ['customers', params];
 
-interface CommonErrorHandlerProps {
-  errorMessageTitle: string;
-  errorMessage?: string;
-}
+  return useQuery(queryKey, () => CustomerApi.get(params), {
+    enabled: isSearch,
+    onError: (error: AxiosError<any>) =>
+      handleApiError({
+        error,
+        errorMessageTitle: '회원 통합조회 실패',
+      }),
+  });
+};
 
-// 에러 처리 커스텀훅
 export const useHandleApiError = () => {
   const snackbar = useSnackbar();
 
@@ -398,23 +405,6 @@ export const useHandleApiError = () => {
   return {
     handleApiError,
   };
-};
-
-const useGetCustomers = (
-  params?: GetCustomersRequestQuery,
-  isSearch?: boolean,
-) => {
-  const { handleApiError } = useHandleApiError();
-  const queryKey = ['customers', params];
-
-  return useQuery(queryKey, () => CustomerApi.get(params), {
-    enabled: isSearch,
-    onError: (error: AxiosError<any>) =>
-      handleApiError({
-        error,
-        errorMessageTitle: '회원 통합조회 실패',
-      }),
-  });
 };
 ```
 
@@ -598,13 +588,11 @@ interface MockResult {
   use?: boolean;
 }
 
-
 // mockAdapter 생성
 // onNoMatch: "passthrough"는 가짜 응답이 없는 경우에는 요청을 실제 서버로 전달하여 실제 응답을 받아옴.
 const mock = new MockAdapter(axios, { onNoMatch: "passthrough" });
 
 export const fetchOrderListMock = () =>
-
 // /order/list로 시작하는 GET 요청에 대해 200 status와 fetchOrderListSuccessResponse를 응답으로 설정한 response를 생성
   mock.onGet(/\/order\/list/).reply(200, fetchOrderListSuccessResponse);
 

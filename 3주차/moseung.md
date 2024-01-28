@@ -125,3 +125,104 @@ orderCartApiRequester.interceptors.request.use(setRequesterDefaultHeader);
 ```
 
 요청 옵션에 따라 다른 인셉터를 만들기 위해 [빌더 패턴](https://refactoring.guru/ko/design-patterns/builder)을 추가하여 APIBuilder같은 클래스 형태로 구성하기도 한다.
+
+### API 응답 지정하기
+```tsx
+interface Response<T> {
+  data: T;
+  status: string;
+  serverDateTime: string;
+  errorCode?: string;
+  errorMessage?: string;
+}
+
+// 카트 정보를 가져오기 위한 API 요청
+// AxiosPromise를 반환하며, 해당 Promise의 제네릭 타입은 Response<FetchCartResponse>로 정의
+// FetchCartResponse는 서버에서 받아온 카트 정보에 대한 타입
+const fetchCart = (): AxiosPromise<Response<FetchCartResponse>> => {
+  apiRequester.get < Response < FetchCartResponse >> 'cart';
+};
+
+// 카트에 데이터를 추가하거나 업데이트하기 위한 API 요청
+// AxiosPromise를 반환하며, 해당 Promise의 제네릭 타입은 Response<PostCartResponse>로 정의
+// PostCartResponse는 서버에서 받아온 카트에 대한 업데이트 결과에 대한 타입
+const postCart = (
+  postCartRequest: PostCartRequest
+): AxiosPromise<Response<PostCartResponse>> => {
+  apiRequester.post<Response<PostCartResponse>>('cart', postCartRequest);
+};
+```
+위 값에서 apiRequester에서 타입을 처리할 수도 있지만 그럴경우 응답값이 없는 요청에 대해서 처리하기 까다로워지므로 requester은 응답값이 어떤지 알 수 없게 설계한다.
+<br>
+만약 프론트에서 사용하진 않지만 다른 API서버로 넘겨줘야하는 값이 있거나 어떤 값이 내려올지 알 수 없는 것들은 unknown을 사용한다. 그리고 만약 프론트에서 써야할 값이 생기면 새로 타입을 지정해준다.
+```tsx
+interface response {
+data:{
+cart:Cart[],
+forpass:unknown
+}
+}
+```
+
+### 뷰모델 사용하기
+API응답은 변할 가능성이 크고 초기 프로젝트일수록 그럴 가능성이 높아진다. 그러므로 변화에 유리한 방법을 설계해야한다.
+<br>
+아래 코드에는 어떤 문제들이 있을까 ?
+```tsx
+import React, { useEffect, useState } from 'react';
+
+const List = () => {
+  const [totalItemLength,setTotalItemLength] = useState(0);
+  const [items,setItems] = useState<ListItem[]>()
+
+  useEffect(()=>{
+    fetchList().then(({data})=>{
+      setItems(data)
+      setTotalItemLength(data.length
+        
+        )
+    })
+  },[])
+
+  return (
+    <div>
+      {items.map}
+      <p>{totalItemLength}</p>
+    </div>
+  );
+};
+
+export default List;
+```
+
+```tsx
+interface JobListItemResponse {
+  name: string;
+}
+
+interface JobListResponse {
+  jobItems: JobListItemResponse[];
+}
+
+class JobList {
+  readonly totalItemCount: number;
+  readonly items: JobListItemResponse[];
+
+  constructor({ jobItems }: JobListResponse) {
+    this.totalItemCount = jobiItems.length;
+    this.items = jouItems;
+  }
+}
+
+const fetchJobList = async (
+  filter?: ListFetchFilter
+): Promise<JobListResponse> => {
+  const { data } = await api
+    .params({ ...filter })
+    .get('/apis/get-list-summaries')
+    .call<Response<JobListResponse>>();
+
+  return new JobList(data);
+};
+```
+

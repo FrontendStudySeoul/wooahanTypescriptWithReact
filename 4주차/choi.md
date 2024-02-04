@@ -1,8 +1,8 @@
 # 8장 JSX에서 TSX로
 
-## 요약
-- 리액트에서 TS 사용 시, @types/react 패키지에 정의된 리액트 내장 타입을 사용
-- 타입스크립트로 리액트 코드를 작성하다보면 컴포넌트의 타입을 정해줘야함
+## 목차
+
+- 타입스크립트로 리액트 코드를 작성 시 @types/react 패키지에 정의된 리액트 내장 타입을 사용
 - 대표적인 리액트 컴포넌트 타입
   - 클래스 컴포넌트 타입, 함수 컴포넌트 타입
 - 함수 컴포넌트의 반환 타입
@@ -14,7 +14,9 @@
   - React.forwardRef
 
 ## 대표적인 리액트 컴포넌트 타입
+
 ### 1. 클래스 컴포넌트 타입
+
 ```tsx
 interface Component<P = {}, S = {}, SS = any> extends ComponentLifecycle<P, S, SS {}
 
@@ -24,18 +26,19 @@ class Component<P, S> {
 
 class PureComponent<P = {}, S = {}, SS = any> extends Component<P, S, SS> {}
 ```
-- 클래스 컴포넌트는 render메소드에서 ReactNode를 리턴
 - P와 S는 props와 상태를 의미하며 각각 타입을 제네릭으로 받음
 - 상태가 있는 컴포넌트일 때는 제네릭의 두번째 인자로 타입을 넘겨주면 상태에 대한 타입을 지정 가능
   
 ### 2. 함수 컴포넌트 타입
-- 함수 컴포넌트는 ReactElement를 리턴
+
 - React.FC & React.VFC : 리액트에서 함수 컴포넌트의 타입 지정을 위해 제공되는 타입
    - React.FC : children props 허용 O
    - React.VFC : children props 허용 X
-    ⇒ 리액트 v18 이후, React.VFC 가 삭제되고 React.FC에서는 children이 삭제됐다. 따라서 React.VFC 대신 React.FC를 사용하거나 props타입, 반환 타입을 직접 지정해 타이핑해야 한다.
+
+	⇒ 리액트 v18 이후, React.VFC 가 삭제되고 React.FC에서는 children이 삭제됐다. 따라서 React.VFC 대신 React.FC를 사용하거나 props타입, 반환 타입을 직접 지정해 타이핑해야 한다.
 
 ## Children props 타입 지정
+
 ```tsx
 type PropsWithChildren<P> = P & {children?: ReactNode | undefined };
 ```
@@ -64,31 +67,24 @@ type WelcomeProps = {
 
 
 ## 함수 컴포넌트의 반환 타입
+
 ### 포함 관계
-- JSX.Element, ReactElement, ReactNode 모두 리액트의 요소를 나타내는 타입
+
+- 세 가지 모두 모두 리액트의 요소를 나타내는 타입
+  
 ![image](https://github.com/FrontendStudySeoul/wooahanTypescriptWithReact/assets/25587196/2333ddda-0c0a-416d-8c3c-3aba28ba39a1)
 
-
-```tsx
-interface ReactElement<P = any,
-	T extends string | JSXElementConstructor<any> =
-	| string
-	| JSXElementContstructor<any>
->{
-	type: T,
-	props: P,
-	key: Key | null;
-}
-```
 - React.createElement의 반환 타입은 ReactElement와 JSX.Element
 - 리액트는 실제 DOM이 아니라 가상 DOM을 기반으로 렌더링하는데 가상 DOM의 엘리먼트는 ReactElement 형태로 저장
 
 
 ### React.Node
+
 - ReactNode는 ReactElement의 superset
 - ReactNode는 리액트의 render 함수가 반환할 수 있는 모든 형태를 담음
-- 리액트 컴포넌트가 가질 수 있는 모든 타입을 의미
+- 즉, 리액트 컴포넌트가 가질 수 있는 모든 타입을 의미
 - prop으로 리액트 컴포넌트가 다양한 형태를 가질 수 있게 하고싶을 때 유용
+- 
 ```tsx
 type ReactFragment = {} | Iterable<ReactNode>; // ReactNode의 배열 형태
 type ReactNode = 
@@ -102,8 +98,6 @@ type ReactNode =
  
 ### ReactElement
 
-- JSX는 리액트 엘리먼트를 생성하기 위한 문법 (createElement)
-- 리액트는 여러 개의 createElement 오버라이딩 메서드가 존재하는데, 이 메서드들이 반환하는 타입은 ReactElement 타입 기반
 - 트랜스파일러는 JSX 문법을 createElement 메서드 호출문으로 변환하여 리액트 엘리먼트를 생성
 - 리액트는 리액트 엘리먼트 객체를 읽어서 DOM을 구성
 - ReactElement 타입은 JSX의 createElement 메서드 호출로 생성된 리액트 엘리먼트를 나타내는 타입
@@ -117,12 +111,18 @@ declare global {
 	}
 }
 ```
+
 - JSX.Element 타입은 리액트의 ReactElement를 제너릭으로 확장하고 있는 타입
-- props와 타입 필드를 any로 가지는 타입
-- JSX.Element의 제너릭 인터페이스가 ReactElement
+- props와 타입 필드를 any로 가짐
 - 글로벌 네임스페이스에 정의되어 있어 외부 라이브러리에서 컴포넌트 타입을 재정의할 수 있는 유연성 제공
 - 컴포넌트 타입을 재정의하거나 변경하는 것에 용이
 - 리액트 엘리먼트를 prop으로 전달받아 render props 패턴으로 컴포넌트를 구현할 때 유용
+
+### prop을 JSX.Element 타입으로 선언
+
+- icon prop을 JSX.Element 타입으로 선언함으로써 해당 prop에는 JSX 문법만 삽입 가능
+- icon.props에 접근하여 prop으로 넘겨받은 컴포넌트의 상세 데이터를 가져올 수 있다
+  - JSX.Element 대신에 ReactElement를 사용하는 것이 추론 관점에서 더 유용
 
 ```tsx
 interface Props {
@@ -141,11 +141,11 @@ const App = () => {
 	return <Item icon={<Icon size={14} />} />
 ```
 
-- icon prop을 JSX.Element 타입으로 선언함으로써 해당 prop에는 JSX 문법만 삽입 가능
-- icon.props에 접근하여 prop으로 넘겨받은 컴포넌트의 상세 데이터를 가져올 수 있다
-  - JSX.Element 대신에 ReactElement를 사용하는 것이 추론 관점에서 더 유용하다.
 
 
+### prop을 ReactElement 타입으로 선언
+
+- 이처럼 코드를 작성하면 icon.props에 접근할 때 어떤 props가 있는지 IDE에 표시되어 추론 가능
 ```tsx
 interface IconProps {
 	size: number;
@@ -162,7 +162,6 @@ const Item = ({ icon }: Props) => {
 
 	return <li>{icon}</li>;
 };
-// 이처럼 코드를 작성하면 icon.props에 접근할 때 어떤 props가 있는지 IDE에 표시되어 추론 가능
 ```
 
 ### 리액트에서 기본 HTML 요소 타입 활용하기

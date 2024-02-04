@@ -4,21 +4,15 @@
 
 - 타입스크립트로 리액트 코드를 작성 시 @types/react 패키지에 정의된 리액트 내장 타입을 사용
 - 대표적인 리액트 컴포넌트 타입
-  - 클래스 컴포넌트 타입, 함수 컴포넌트 타입
 - 함수 컴포넌트의 반환 타입
-  - JSX.Element
-  - ReactElement
-  - ReactNode
 - 리액트에서 기본 HTML 요소 타입 활용하기
-  - DetailedHTMLProps, ComponentWithoutRef 비교
-  - React.forwardRef
 
 ## 대표적인 리액트 컴포넌트 타입
 
 ### 1. 클래스 컴포넌트 타입
 
 ```tsx
-interface Component<P = {}, S = {}, SS = any> extends ComponentLifecycle<P, S, SS {}
+interface Component<P = {}, S = {}, SS = any> extends ComponentLifecycle<P, S, SS> {}
 
 class Component<P, S> {
 	/* ... 생략 */
@@ -35,7 +29,7 @@ class PureComponent<P = {}, S = {}, SS = any> extends Component<P, S, SS> {}
    - React.FC : children props 허용 O
    - React.VFC : children props 허용 X
 
-	⇒ 리액트 v18 이후, React.VFC 가 삭제되고 React.FC에서는 children이 삭제됐다. 따라서 React.VFC 대신 React.FC를 사용하거나 props타입, 반환 타입을 직접 지정해 타이핑해야 한다.
+	⇒ 리액트 v18 이후, React.VFC 가 deprecated 되고 React.FC에서는 children이 삭제됐다. 따라서 React.VFC 대신 React.FC를 사용하거나 props타입, 반환 타입을 직접 지정해 타이핑해야 한다.
 
 ## Children props 타입 지정
 
@@ -47,6 +41,7 @@ type PropsWithChildren<P> = P & {children?: ReactNode | undefined };
   - ReactElement 외에도 boolean, number 등 여러 타입을 포함하고 있는 타입
   - 더 구체적으로 타이핑 하는 용도에는 부적합
     - (ex) 특정 문자열만 허용하고 싶을 때는 children에 대해 추가로 타이핑
+
 ```tsx
 // example 1
 type WelcomeProps = {
@@ -203,7 +198,8 @@ type ButtonProps = {
 
 ### 언제 ComponentPropsWithoutRef를 사용하면 좋을까
 
-- 이외에도 HTMLProps, ComponentPropsWithRef 등 HTML 태그의 속성을 지원하기 위한 다양한 타입이 존재
+- 이외에도 HTML 태그의 속성을 지원하기 위한 다양한 타입이 존재
+- HTMLProps, ComponentPropsWithRef 등
 
 ```tsx
 // HTML button 태그와 동일한 역할을 하지만 커스텀한 UI를 적용해 재사용성을 높이기 위한 Button 컴포넌트
@@ -226,6 +222,8 @@ const Button = (props: NativeButtonProps) => {
 ```
 
 - 클래스 컴포넌트와 함수 컴포넌트에서 ref를 props로 받아 전달하는 방식에 차이가 있다
+	- 클래스 컴포넌트에서 ref 객체는 마운트된 컴포넌트의 인스턴스를 current 속성값으로 가짐
+	- 함수 컴포넌트에서는 생성된 인스턴스가 없기 때문에 ref에 기대한 값이 할당되지 않음
 
 ```tsx
 // 클래스 컴포넌트로 만들어진 Button 컴포넌트를 사용할 때
@@ -259,14 +257,11 @@ const WrappedButton = () => {
 };
 ```
 
-- 클래스 컴포넌트에서 ref 객체는 마운트된 컴포넌트의 인스턴스를 current 속성값으로 가짐
-- 함수 컴포넌트에서는 생성된 인스턴스가 없기 때문에 ref에 기대한 값이 할당되지 않음
 
 ### React.forwardRef
 
 ```tsx
 // forwardRef를 사용해 ref를 전달받을 수 있도록 구현
-// props : ref에 대한 타입 정보, ref : props에 대한 타입 정보
 const Button = forwardRef((props, ref) => {
 	return <button ref={ref}{...props}>버튼</button>;
 });
@@ -297,7 +292,7 @@ const Button = forwardRef<HTMLButtonElement, NativeButtonType>((props, ref) => {
 });
 ```
 
-- 함수 컴포넌트에서 props로 ref를 포함하는 타입을 사용하면 실제로는 동작하지 않는 ref를 받도록 타입이 지정
+- 함수 컴포넌트에서 props로 ref를 포함하는 타입을 사용하면 실제로는 동작하지 않는 ref를 받도록 타입이 지정된다
 - HTML 속성을 확장하는 props를 설계할 때는 ComponentPropsWIthoutRef 타입을 사용
 - ref가 실제로 forwardRef와 함께 사용될 때만 props로 전달되도록 타입을 정의하는 것이 안전하다.
 

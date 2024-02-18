@@ -498,6 +498,7 @@ SelectProps<OptionType>) => {
 - **함수에서 공변성과 반공변성 주의!**
   - 공변성 반공병성 → 함수 간에 서로 대입할 수 있냐 없냐 그걸 따지는 것. (타입 간의 관계)
   - 이걸 알아둬야 왜 이 함수는 여기에 대입이 안되고, 여기엔 대입이 되는 지 구별할 수 있음
+  - 타입스크립트에서의 좁은 타입이란 더 구체적이거나 제한적인 타입
 - **공변성 (함수의 리턴값)**
 
   - A(좁은 타입)가 B(넓은 타입)의 서브타입이면, `T<A>`는 `T<B>`의 서브타입이다.
@@ -554,8 +555,9 @@ SelectProps<OptionType>) => {
   /* 책 예시 */
   type PrintUserInfo<U extends User> = (user: U) => void;
 
-  let printUser: PrintUserInfo<User> = (user) =>
-    console.log(user.id, user.nickName);
+  let printUser: PrintUserInfo<User> = (user) => console.log(user.id);
+  let printMember: PrintUserInfo<Member> = (user) => console.log(user.id, user.nickName);
+
 
   printMember = printUser; // Ok
 

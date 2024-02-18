@@ -382,11 +382,12 @@ interface SelectProps<OptionType extends Record<string, string>>
 
   - `types/react` 의 global.d.ts 엔 다양한 [Element](https://developer.mozilla.org/en-US/docs/Web/API/Element) 에 대한 타입이 있다.
   - 예를 들어, `<button>` 태그의 타입을 원한다면 `HTMLButtonElement` 를 참조하면 브라우저에서 지원하는 [HTMLButtonElement](https://developer.mozilla.org/en-US/docs/Web/API/HTMLButtonElement) 의 속성에 접근할 수 있다.
-  - **`HTMLAttributes<~~~Element>`**
-    - button 엘리먼트의 change 이벤트를 구독하기 위해선 리액트에서는 `onChange` prop 을 이용하지만, `HTMLButtonElement` 는 브라우저에서 지원하는 `onchange` 속성을 담고 있다. 이를 해소하기 위해선 HTMLAttributes 로 HTMLButtonElement 를 Wrapping 해줘야 한다.
-  - 예시) React.ButtonHTMLAttributes사용해 확장 가능한 NativeProps를 가지는 컴포넌트 Props type
 
-    ```tsx
+- **`HTMLAttributes<~~~Element>`**
+  - button 엘리먼트의 change 이벤트를 구독하기 위해선 리액트에서는 `onChange` prop 을 이용하지만, `HTMLButtonElement` 는 브라우저에서 지원하는 `onchange` 속성을 담고 있다. 이를 해소하기 위해선 HTMLAttributes 로 HTMLButtonElement 를 Wrapping 해줘야 한다.
+  - 버튼에 대한 특화된 속성을 사용하려면 HTMLAttributes말고, ButtonHTMLAttributes를 사용할 수 있다. 예시) React.ButtonHTMLAttributes사용해 확장 가능한 NativeProps를 가지는 컴포넌트 Props type
+
+  ```tsx
     /* React.ButtonAttribute<HTMLButtonElement> 에서 type 속성을 제외한 모든 속성 포함
     <button> 요소에 대한 표준 속성들과 React에서 추가적으로 제공하는 속성들을 포함하되, type속성은 포함X
     -> type 속성 커스터마이즈를 위한 Button컴포넌트를 만들 때
@@ -396,7 +397,7 @@ interface SelectProps<OptionType extends Record<string, string>>
       React.ButtonHTMLAttributes<HTMLButtonElement>,
       'type'
     >;
-    ```
+  ```
 
 - **`[ComponentProps<T>]`**
   https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/react/v17/index.d.ts#L828-L833
